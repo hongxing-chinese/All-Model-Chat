@@ -1,9 +1,8 @@
 
 import React, { useEffect, useState } from 'react';
-import { Github, Star, ExternalLink } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
 import { translations } from '../../../utils/appUtils';
 import { AppLogo } from '../../icons/AppLogo';
-import { useResponsiveValue } from '../../../hooks/useDevice';
 
 interface AboutSectionProps {
   t: (key: keyof typeof translations) => string;
@@ -23,26 +22,16 @@ const compareVersions = (v1: string, v2: string) => {
 };
 
 export const AboutSection: React.FC<AboutSectionProps> = ({ t }) => {
-  const iconSize = useResponsiveValue(18, 20);
   const currentVersion = "1.8.5"; 
-  const [stars, setStars] = useState<number | null>(null);
   const [latestVersion, setLatestVersion] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [repoRes, releaseRes] = await Promise.allSettled([
-          fetch('https://api.github.com/repos/yeahhe365/All-Model-Chat'),
-          fetch('https://api.github.com/repos/yeahhe365/All-Model-Chat/releases/latest')
-        ]);
+        const releaseRes = await fetch('https://api.github.com/repos/yeahhe365/All-Model-Chat/releases/latest');
 
-        if (repoRes.status === 'fulfilled' && repoRes.value.ok) {
-          const data = await repoRes.value.json();
-          setStars(data.stargazers_count);
-        }
-
-        if (releaseRes.status === 'fulfilled' && releaseRes.value.ok) {
-          const data = await releaseRes.value.json();
+        if (releaseRes.ok) {
+          const data = await releaseRes.json();
           setLatestVersion(data.tag_name);
         }
       } catch (err) {
@@ -128,32 +117,6 @@ export const AboutSection: React.FC<AboutSectionProps> = ({ t }) => {
         <p className="text-sm text-[var(--theme-text-secondary)] leading-relaxed max-w-md">
           {t('about_description')}
         </p>
-      </div>
-
-      {/* Actions */}
-      <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-        <a 
-          href="https://github.com/yeahhe365/All-Model-Chat" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3 text-sm font-semibold text-white bg-[#24292F] hover:bg-[#24292F]/90 dark:bg-white dark:text-black dark:hover:bg-gray-200 rounded-xl transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
-        >
-          <Github size={iconSize} />
-          <span>{t('about_view_on_github')}</span>
-        </a>
-
-        {stars !== null && (
-             <a 
-             href="https://github.com/yeahhe365/All-Model-Chat/stargazers" 
-             target="_blank" 
-             rel="noopener noreferrer"
-             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-medium text-[var(--theme-text-primary)] bg-[var(--theme-bg-input)] border border-[var(--theme-border-secondary)] hover:bg-[var(--theme-bg-tertiary)] hover:border-[var(--theme-border-focus)] rounded-xl transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 group"
-           >
-             <Star size={iconSize} className="text-yellow-500 fill-yellow-500 group-hover:scale-110 transition-transform duration-300" />
-             <span className="tabular-nums">{stars.toLocaleString()}</span>
-             <span className="text-[var(--theme-text-tertiary)] ml-1">Stars</span>
-           </a>
-        )}
       </div>
     </div>
   );
